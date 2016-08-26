@@ -1,0 +1,28 @@
+{
+  "name": "link-generator",
+  "version": "0.0.1",
+  "description": "Simple node.js application to upload file or zipped folders on s3 and generate a link",
+  "main": "app.js",
+  "dependencies": {
+    "s3": "^4.4.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ishanatmuz/link-generator.git"
+  },
+  "keywords": [
+    "node",
+    "node.js",
+    "link"
+  ],
+  "author": "Ishan <ishanatmuzaffarpur@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ishanatmuz/link-generator.git"
+  },
+  "homepage": "https://github.com/ishanatmuz/link-generator.git"
+}
