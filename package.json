@@ -5,7 +5,8 @@
   "main": "app.js",
   "dependencies": {
     "aws-sdk": "^2.5.3",
-    "chokidar": "^1.6.0"
+    "chokidar": "^1.6.0",
+    "zip-dir": "^1.0.2"
   },
   "devDependencies": {},
   "scripts": {
