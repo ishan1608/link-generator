@@ -4,7 +4,7 @@
   "description": "Simple node.js application to upload file or zipped folders on s3 and generate a link",
   "main": "app.js",
   "dependencies": {
-    "s3": "^4.4.0"
+    "aws-sdk": "^2.5.3"
   },
   "devDependencies": {},
   "scripts": {
