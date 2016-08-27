@@ -87,8 +87,8 @@ completed_watcher
             console.log('Zipping ', new_path);
             // Zipping the folder in same location to be captured by file watcher
             // zipping new_path to new_path + ".zip"
-            var shell_command = 'cd ' + completed_folder_path +' && zip -r ' + path.basename(new_path) + '.zip '
-                + path.basename(new_path);
+            var shell_command = 'cd ' + completed_folder_path +' && zip -r "' + path.basename(new_path) + '.zip" "'
+                + path.basename(new_path) + '"';
             console.log(shell_command);
             exec(shell_command, function(error, stdout, stderr) {
                 console.log('stdout: ' + stdout);

@@ -43,8 +43,8 @@ function initialize() {
             console.log('NEW Location ' + copied_path);
             // Zipping the folder in same location to be captured by file completed_watcher
             // zipping copied_path to copied_path.zip
-            var shell_command = 'cd ' + completed_folder_path +' && zip -r ' + path.basename(copied_path) + '.zip '
-                + path.basename(copied_path);
+            var shell_command = 'cd ' + completed_folder_path +' && zip -r "' + path.basename(copied_path) + '.zip" "'
+                + path.basename(copied_path) + '"';
             console.log(shell_command);
             exec(shell_command, function(error, stdout, stderr) {
                 console.log('stdout: ' + stdout);
