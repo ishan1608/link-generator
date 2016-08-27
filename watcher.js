@@ -35,7 +35,7 @@ function initialize() {
                 // Use progress listener as needed
                 s3.upload(params).on('httpUploadProgress', function(event) {
                     // TODO Enter items into database here itself, have a status parameter
-                    console.log(path.basename(new_path) + ': ', event.loaded, '/', event.total);
+                    console.log('uploading ' + path.basename(new_path) + ': ', (event.loaded/event.total) * 100 + "%");
                 }).send(function(err, data) {
                     if (err) {
                         console.log("An error occurred ", err);
@@ -59,6 +59,14 @@ function initialize() {
                                     });
                             }
                         });
+                        // Removing if it is a zip file
+                        if (path.extname(new_path) === '.zip') {
+                            fs.unlink(new_path, function(err) {
+                                if (err) {
+                                    console.log(err);
+                                }
+                            });
+                        }
                     }
                 });
             }
