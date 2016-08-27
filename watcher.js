@@ -41,7 +41,7 @@ function initialize() {
                 // Use progress listener as needed
                 s3.upload(params).on('httpUploadProgress', function(event) {
                     // TODO Enter items into database here itself, have a status parameter
-                    console.log('uploading ' + path.basename(new_path) + ': ', (event.loaded/event.total) * 100 + "%");
+                    console.log('uploading ' + path.basename(new_path) + ': ' + event.loaded + " / " + event.total);
                 }).send(function(err, data) {
                     if (err) {
                         console.log("An error occurred ", err);
