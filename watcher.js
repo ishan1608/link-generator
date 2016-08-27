@@ -16,18 +16,18 @@ var mongoUri = process.env.DATABASE_URL || 'mongodb://127.0.0.1:27017/torrent-do
 var s3 = new AWS.S3({signatureVersion: 'v4'});
 
 // Watch changes to a folder
-var folder_path = '';
+var completed_folder_path = '';
 var incomplete_folder_path = '';
 if(os.hostname() === 'iUbuntu') {
-    folder_path = 'data';
+    completed_folder_path = 'data';
     incomplete_folder_path = 'incomplete';
 } else {
-    folder_path = '/home/ubuntu/Downloads/transmission/completed';
+    completed_folder_path = '/home/ubuntu/Downloads/transmission/completed';
     incomplete_folder_path = '/home/ubuntu/Downloads/transmission/incomplete';
 }
 
 function initialize() {
-    // Initialize incomplete watcher
+    // Initialize incomplete_watcher
     var incomplete_watcher = chokidar.watch(incomplete_folder_path, {
         ignored: /[\/\\]\./,
         persistent: true,
@@ -39,24 +39,24 @@ function initialize() {
     incomplete_watcher.on('unlinkDir', function(old_path) {
         console.log(old_path + " has been removed");
         if (path.dirname(old_path) === incomplete_folder_path) {
-            var copied_path = path.join(folder_path, path.basename(old_path));
+            var copied_path = path.join(completed_folder_path, path.basename(old_path));
             console.log('NEW Location ' + copied_path);
-            // Zipping the folder in same location to be captured by file watcher
+            // Zipping the folder in same location to be captured by file completed_watcher
             zipdir(copied_path, { saveTo: copied_path + ".zip" }, function (err, buffer) {
                 // `buffer` is the buffer of the zipped file
                 // And the buffer was saved to new_path + ".zip"
                 if (err) {
                     console.error('Error zipping ' + copied_path + err);
                 } else {
-                    // Successfully zipped the folder and now it will be caught by file watcher
+                    // Successfully zipped the folder and now it will be caught by file completed_watcher
                     console.log('Successfully zipped ' + copied_path + ".zip");
                 }
             });
         }
     });
 
-    // Initialize complete watcher.
-    var watcher = chokidar.watch(folder_path, {
+    // Initialize completed_watcher.
+    var completed_watcher = chokidar.watch(completed_folder_path, {
         ignored: /[\/\\]\./,
         persistent: true,
         awaitWriteFinish: {
@@ -64,10 +64,10 @@ function initialize() {
             pollInterval: 100
         }
     });
-    watcher
+    completed_watcher
         .on('add', function(new_path) {
             // Only watching files of current folder
-            if (path.dirname(new_path) === folder_path) {
+            if (path.dirname(new_path) === completed_folder_path) {
                 //console.log('File', new_path, 'has been added');
                 // Preparing S3 Upload
                 var file_stream = fs.createReadStream(new_path);
@@ -102,6 +102,7 @@ function initialize() {
                         });
                         // Removing if it is a zip file
                         if (path.extname(new_path) === '.zip') {
+                            console.log('Remvoing zip file ' + new_path);
                             fs.unlink(new_path, function(err) {
                                 if (err) {
                                     console.log(err);
@@ -112,25 +113,8 @@ function initialize() {
                 });
             }
         });
-        /*.on('addDir', function(new_path) {
-            // Only watching folder of current folder
-            if (path.dirname(new_path) === folder_path) {
-                console.log('Directory', new_path, 'has been added');
-                // Zipping the folder in same location to be captured by file watcher
-                zipdir(new_path, { saveTo: new_path + ".zip" }, function (err, buffer) {
-                    // `buffer` is the buffer of the zipped file
-                    // And the buffer was saved to new_path + ".zip"
-                    if (err) {
-                        console.error('Error zipping ' + new_path + err);
-                    } else {
-                        // Successfully zipped the folder and now it will be caught by file watcher
-                        //console.log('Successfully zipped ' + new_path + ".zip");
-                    }
-                });
-            }
-        });*/
 
-    console.log("Watching: " + folder_path + " & " + incomplete_folder_path);
+    console.log("Watching: " + completed_folder_path + " & " + incomplete_folder_path);
 }
 
 exports.initialize = initialize;
