@@ -106,5 +106,8 @@ fabric.properties
 ### Data Folder ###
 data/*
 
+### Incomplete Folder ###
+incomplete/*
+
 ### AWS credentials ###
 credentials.csv

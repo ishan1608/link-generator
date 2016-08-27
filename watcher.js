@@ -17,14 +17,45 @@ var s3 = new AWS.S3({signatureVersion: 'v4'});
 
 // Watch changes to a folder
 var folder_path = '';
+var incomplete_folder_path = '';
 if(os.hostname() === 'iUbuntu') {
     folder_path = 'data';
+    incomplete_folder_path = 'incomplete';
 } else {
     folder_path = '/home/ubuntu/Downloads/transmission/completed';
+    incomplete_folder_path = '/home/ubuntu/Downloads/transmission/incomplete';
 }
 
 function initialize() {
-    // Initialize watcher.
+    // Initialize incomplete watcher
+    var incomplete_watcher = chokidar.watch(incomplete_folder_path, {
+        ignored: /[\/\\]\./,
+        persistent: true,
+        awaitWriteFinish: {
+            stabilityThreshold: 2000,
+            pollInterval: 100
+        }
+    });
+    incomplete_watcher.on('unlinkDir', function(old_path) {
+        console.log(old_path + " has been removed");
+        if (path.dirname(old_path) === incomplete_folder_path) {
+            var copied_path = path.join(folder_path, path.basename(old_path));
+            console.log('NEW Location ' + copied_path);
+            // Zipping the folder in same location to be captured by file watcher
+            zipdir(copied_path, { saveTo: copied_path + ".zip" }, function (err, buffer) {
+                // `buffer` is the buffer of the zipped file
+                // And the buffer was saved to new_path + ".zip"
+                if (err) {
+                    console.error('Error zipping ' + copied_path + err);
+                } else {
+                    // Successfully zipped the folder and now it will be caught by file watcher
+                    console.log('Successfully zipped ' + copied_path + ".zip");
+                }
+            });
+        }
+    });
+
+    // Initialize complete watcher.
     var watcher = chokidar.watch(folder_path, {
         ignored: /[\/\\]\./,
         persistent: true,
@@ -80,11 +111,11 @@ function initialize() {
                     }
                 });
             }
-        })
-        .on('addDir', function(new_path) {
+        });
+        /*.on('addDir', function(new_path) {
             // Only watching folder of current folder
             if (path.dirname(new_path) === folder_path) {
-                //console.log('Directory', new_path, 'has been added');
+                console.log('Directory', new_path, 'has been added');
                 // Zipping the folder in same location to be captured by file watcher
                 zipdir(new_path, { saveTo: new_path + ".zip" }, function (err, buffer) {
                     // `buffer` is the buffer of the zipped file
@@ -97,9 +128,9 @@ function initialize() {
                     }
                 });
             }
-        });
+        });*/
 
-    console.log("Watching: " + folder_path);
+    console.log("Watching: " + folder_path + " & " + incomplete_folder_path);
 }
 
 exports.initialize = initialize;
