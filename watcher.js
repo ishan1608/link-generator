@@ -5,9 +5,9 @@ var AWS = require('aws-sdk');
 var fs = require('fs');
 var chokidar = require('chokidar');
 var path = require('path');
-var zipdir = require('zip-dir');
 var MongoClient = require('mongodb').MongoClient;
 var os = require('os');
+var exec = require('child_process').exec;
 
 var AWS_BUCKET_NAME = 's3-link-generator';
 var mongoUri = process.env.DATABASE_URL || 'mongodb://127.0.0.1:27017/torrent-downloads';
@@ -19,8 +19,8 @@ var s3 = new AWS.S3({signatureVersion: 'v4'});
 var completed_folder_path = '';
 var incomplete_folder_path = '';
 if(os.hostname() === 'iUbuntu') {
-    completed_folder_path = 'data';
-    incomplete_folder_path = 'incomplete';
+    completed_folder_path = '/home/ishan/nodejs/link-generator/data';
+    incomplete_folder_path = '/home/ishan/nodejs/link-generator/incomplete';
 } else {
     completed_folder_path = '/home/ubuntu/Downloads/transmission/completed';
     incomplete_folder_path = '/home/ubuntu/Downloads/transmission/incomplete';
@@ -42,14 +42,15 @@ function initialize() {
             var copied_path = path.join(completed_folder_path, path.basename(old_path));
             console.log('NEW Location ' + copied_path);
             // Zipping the folder in same location to be captured by file completed_watcher
-            zipdir(copied_path, { saveTo: copied_path + ".zip" }, function (err, buffer) {
-                // `buffer` is the buffer of the zipped file
-                // And the buffer was saved to new_path + ".zip"
-                if (err) {
-                    console.error('Error zipping ' + copied_path + err);
-                } else {
-                    // Successfully zipped the folder and now it will be caught by file completed_watcher
-                    console.log('Successfully zipped ' + copied_path + ".zip");
+            // zipping new_path to new_path + ".zip"
+            var shell_command = 'cd ' + completed_folder_path +' && zip -r ' + path.basename(new_path) + '.zip '
+                + path.basename(new_path);
+            console.log(shell_command);
+            exec(shell_command, function(error, stdout, stderr) {
+                console.log('stdout: ' + stdout);
+                console.log('stderr: ' + stderr);
+                if (error !== null) {
+                    console.log('exec error: ' + error);
                 }
             });
         }
