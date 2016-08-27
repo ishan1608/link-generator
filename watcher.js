@@ -6,8 +6,10 @@ var fs = require('fs');
 var chokidar = require('chokidar');
 var path = require('path');
 var zipdir = require('zip-dir');
+var MongoClient = require('mongodb').MongoClient;
 
 var AWS_BUCKET_NAME = 's3-link-generator';
+var mongoUri = process.env.DATABASE_URL || 'mongodb://127.0.0.1:27017/torrent-downloads';
 
 // Preparing s3 to new api version
 var s3 = new AWS.S3({signatureVersion: 'v4'});
@@ -39,6 +41,23 @@ function initialize() {
                     } else {
                         // File upload done successfully
                         console.log("Uploaded the file at ", data.Location);
+                        // Adding / updating this to the database
+                        MongoClient.connect(mongoUri, function(err, db) {
+                            if (!err) {
+                                var collection = db.collection('downloads');
+                                collection.findOneAndUpdate({'file': path.basename(new_path)}, {$set: {'link': data.Location}},
+                                    {upsert: true, returnOriginal: false}, function (err, document) {
+                                        if (!err) {
+                                            console.log("updated " + document.value.file + " with " + document.value.link);
+                                            //console.log(document);
+                                        } else {
+                                            console.log('error updating database');
+                                            console.error(err);
+                                        }
+                                        db.close();
+                                    });
+                            }
+                        });
                     }
                 });
             }

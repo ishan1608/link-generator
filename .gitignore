@@ -103,5 +103,8 @@ fabric.properties
 # .idea/misc.xml
 # *.ipr
 
+### Data Folder ###
+data/*
+
 ### AWS credentials ###
 credentials.csv
