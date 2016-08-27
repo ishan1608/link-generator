@@ -7,6 +7,7 @@ var chokidar = require('chokidar');
 var path = require('path');
 var zipdir = require('zip-dir');
 var MongoClient = require('mongodb').MongoClient;
+var os = require('os');
 
 var AWS_BUCKET_NAME = 's3-link-generator';
 var mongoUri = process.env.DATABASE_URL || 'mongodb://127.0.0.1:27017/torrent-downloads';
@@ -15,7 +16,12 @@ var mongoUri = process.env.DATABASE_URL || 'mongodb://127.0.0.1:27017/torrent-do
 var s3 = new AWS.S3({signatureVersion: 'v4'});
 
 // Watch changes to a folder
-var folder_path = 'data';
+var folder_path = '';
+if(os.hostname() === 'iUbuntu') {
+    folder_path = 'data';
+} else {
+    folder_path = '/home/ubuntu/Downloads/transmission/completed';
+}
 
 function initialize() {
     // Initialize watcher.
