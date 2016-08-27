@@ -27,7 +27,11 @@ function initialize() {
     // Initialize watcher.
     var watcher = chokidar.watch(folder_path, {
         ignored: /[\/\\]\./,
-        persistent: true
+        persistent: true,
+        awaitWriteFinish: {
+            stabilityThreshold: 2000,
+            pollInterval: 100
+        }
     });
     watcher
         .on('add', function(new_path) {

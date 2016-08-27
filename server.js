@@ -43,14 +43,17 @@ http.createServer(function(req, res) {
                                 res.writeHead(200, {'Content-Type': 'text/html'});
                                 res.end(output);
                             } else {
+                                console.error(err);
                                 return500(res);
                             }
                         });
                     } else {
+                        console.error(err);
                         return500(res);
                     }
                 });
             } else {
+                console.error(err);
                 return500(res);
             }
         });
