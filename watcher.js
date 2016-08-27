@@ -86,7 +86,7 @@ function initialize() {
                     // `buffer` is the buffer of the zipped file
                     // And the buffer was saved to new_path + ".zip"
                     if (err) {
-                        console.error('Error zipping ' + new_path);
+                        console.error('Error zipping ' + new_path + err);
                     } else {
                         // Successfully zipped the folder and now it will be caught by file watcher
                         //console.log('Successfully zipped ' + new_path + ".zip");
