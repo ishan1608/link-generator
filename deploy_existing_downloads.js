@@ -83,7 +83,7 @@ completed_watcher
     })
     .on('addDir', function(new_path) {
         // Only watching folder of current folder
-        if (path.dirname(new_path) === folder_path) {
+        if (path.dirname(new_path) === completed_folder_path) {
             //console.log('Directory', new_path, 'has been added');
             // Zipping the folder in same location to be captured by file watcher
             zipdir(new_path, { saveTo: new_path + ".zip" }, function (err, buffer) {
