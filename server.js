@@ -2,6 +2,7 @@ var http = require('http');
 var MongoClient = require('mongodb').MongoClient;
 var fs = require('fs');
 var Mustache = require('mustache');
+var wurl = require('wurl');
 
 var port = 9092;
 var ip = "0.0.0.0";
@@ -17,30 +18,43 @@ function return500(res) {
 }
 
 http.createServer(function(req, res) {
-    fs.readFile('downloads_list.html', function(err, file_data) {
-        if (!err) {
-            MongoClient.connect(mongoUri, function(err, db) {
-                if (!err) {
-                    var collection = db.collection('downloads');
-                    collection.find().toArray(function(err, docs) {
-                        if (!err) {
-                            console.log(docs);
-                            var data = {'downloads': docs};
-                            var output = Mustache.render(file_data.toString(), data);
-                            res.writeHead(200, {'Content-Type': 'text/html'});
-                            res.end(output);
-                        } else {
-                            return500(res);
-                        }
-                    });
-                } else {
-                    return500(res);
-                }
-            });
-        } else {
-            return500(res);
-        }
-    });
+    var firstLocation = wurl(1, req.url);
+    if (firstLocation === 'favicon.ico') {
+        fs.readFile('favicon.ico', function(err, file_data) {
+            if (!err) {
+                res.writeHead(200, {"Content-Type": "image/x-icon"});
+                res.end(file_data);
+            } else {
+                res.writeHead(404, {"Content-Type": "text/plain"});
+                res.end("favicon not available");
+            }
+        });
+    } else {
+        fs.readFile('downloads_list.html', function(err, file_data) {
+            if (!err) {
+                MongoClient.connect(mongoUri, function(err, db) {
+                    if (!err) {
+                        var collection = db.collection('downloads');
+                        collection.find().toArray(function(err, docs) {
+                            if (!err) {
+                                //console.log(docs);
+                                var data = {'downloads': docs};
+                                var output = Mustache.render(file_data.toString(), data);
+                                res.writeHead(200, {'Content-Type': 'text/html'});
+                                res.end(output);
+                            } else {
+                                return500(res);
+                            }
+                        });
+                    } else {
+                        return500(res);
+                    }
+                });
+            } else {
+                return500(res);
+            }
+        });
+    }
 }).listen(port, ip);
 
 console.log("Running server at " + ip + ":" + port);
